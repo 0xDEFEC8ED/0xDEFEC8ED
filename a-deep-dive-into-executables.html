@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" prefix="og: http://ogp.me/ns# fb: https://www.facebook.com/2008/fbml">
 <head>
-    <title>Deep dive into an executable - Diary of a Cybersec Enthusiast</title>
+    <title>A Deep Dive Into Executables - Diary of a Cybersec Enthusiast</title>
     <!-- Using the latest rendering mode for IE -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta charset="utf-8">
@@ -9,7 +9,7 @@
 
 
 
-<link rel="canonical" href="/deep-dive-into-an-executable.html">
+<link rel="canonical" href="/a-deep-dive-into-executables.html">
 
         <meta name="author" content="samarth" />
         <meta name="keywords" content="reverse-engineering" />
@@ -17,8 +17,8 @@
 
         <meta property="og:site_name" content="Diary of a Cybersec Enthusiast" />
         <meta property="og:type" content="article"/>
-        <meta property="og:title" content="Deep dive into an executable"/>
-        <meta property="og:url" content="/deep-dive-into-an-executable.html"/>
+        <meta property="og:title" content="A Deep Dive Into Executables"/>
+        <meta property="og:url" content="/a-deep-dive-into-executables.html"/>
         <meta property="og:description" content="When I was in middle school, I was introduced to this new kind of magical number system called &#34;binary&#34;. Since then, I have always been facinated by 0&#39;s and 1&#39;s. I always wondered how different combinations of just 2 possibilities ccould build something so complex and beautiful as the internet …"/>
         <meta property="article:published_time" content="2020-04-11" />
             <meta property="article:section" content="reverse-engineering" />
@@ -79,10 +79,10 @@ Diary of a Cybersec Enthusiast            </a>
         <article>
             <header class="page-header">
                 <h1>
-                    <a href="/deep-dive-into-an-executable.html"
+                    <a href="/a-deep-dive-into-executables.html"
                        rel="bookmark"
-                       title="Permalink to Deep dive into an executable">
-                        Deep dive into an executable
+                       title="Permalink to A Deep Dive Into Executables">
+                        A Deep Dive Into Executables
                     </a>
                 </h1>
             </header>
@@ -105,6 +105,7 @@ Diary of a Cybersec Enthusiast            </a>
 </footer><!-- /.post-info -->                    </div>
                 </div>
                 <p>When I was in middle school, I was introduced to this new kind of magical number system called "binary". Since then, I have always been facinated by 0's and 1's. I always wondered how different combinations of just 2 possibilities ccould build something so complex and beautiful as the internet. I soon began to understand how things needed to be planned out before you start to build it. Reverse-Engineering is different. It needs practice. It requires experience. And you can never say that you've had enough of both to say that you are good at it.</p>
+<p><strong>DISCLAIMER</strong> : Most of the information in this article will be written from memory and when needed, google will come to rescue me from my 2 brain cells. I know that I have taken up a very difficult topic to make a blog post on, but I will still try to cover as can accodomate without getting lost in this rabit hole. I am not sure of how well this article will drafted for a general audience and therefore I suggest some futher read if needed. Also, I should also mention that you might need some programming background to understand the article from this damned canvas. </p>
 <blockquote>
 <p>This topic offers a huge amount of information, and I am by no means an expert in this subject. I will still try to keep it short and convey my knowledge in this subjects through the written content as well as some references attached.</p>
 </blockquote>
@@ -196,14 +197,31 @@ The purpose of ELF header is simple, to inform the executer of the file (Operati
 </ul>
 <p>There are 2 more kinds of ELF formats but currently, I don't plan on doing further research to make this post too long.</p>
 <h3><strong>Headers and their purpose</strong></h3>
-<p><strong>ELF PROGRAM HEADER</strong> : This header is used to describe <strong>SEGMENTS</strong> within the binary which is needed by the ABI layer to describe the memory layout of the executable.</p>
-<p><em>The program header table can be accessed by referencing the offset found in the initial ELF header member called e_phoff (program header table offset)</em></p>
+<p><strong>ELF PROGRAM HEADER</strong> : This header is used to describe <strong>SEGMENTS</strong> (relate to memory segments in 8086) within the binary which is needed by the ABI layer to describe the memory layout of the executable. This header is needed for successful execution of a program. There is not much needed to know here other than the fact that the sections are essentially a derivation from old school 8086 architecture and if you are fluent in it, it'll be easier for you to understand this article better</p>
+<p><em>There are some values defined in the struct of program headers which are really interesting for use-cases where the executable which needs to be reversed is being percieved difficult for an initial learner. Most of these values are further used by the section headers to properly define the different sections that are essential for de-compilers.
+program header contains information (like size, offset and set values generally) on different segments and their permissions (for eg, READ+EXECUTE for text segment). Information on symbols table, string table, global offset table etc.</em></p>
+<p><strong>ELF SECTION HEADER</strong> : This header defines the <strong>SECTIONS</strong> wich live inside the different <strong>SEGMENTS</strong> of the executable. Section headers are used to divide the segments, further into either code, or data. Section headers are not necessary for program execution and therefore, in more reverse engineering cases, sections headers will be either corrupted or missing.</p>
+<p>In our current example, I have not stripped the compiled executable and therefore ghidra would directly be able to derive the necessary tables to make our life easier. Below is the screenshot of all the different sections that were detected by ghidra currently.</p>
+<p>The most interesting sections are,
+ <strong>.text</strong>   : It contains the program code. 
+ <strong>.rodata</strong> : It contains holds all the read-only data such as strings from a line of C code such as a string defined in a printf() function. 
+ <strong>.data</strong>   :This section might contain more data, such as a string that is stored in a variable that is defined in an executable.
+ <strong>.plt</strong>    : This section contains information on the code which is being imported from an external library (in our case, functions like printf(), fgets() and strncmp()).</p>
+<p>I won't be looking into rest of the sections as I still want to keep this post short.</p>
+<p><img alt="ghidra disassembler view" src="/static/images/exe-sc2.png" title="exe-sc2.png"></p>
+<hr>
+<h3><strong>Bringing It All Back Together</strong></h3>
+<p><strong>.text</strong> section starts with an internal function, <strong>undefined __start()</strong> which was generated by the compiler. Most of the instructions are not worth looking into but their <strong>call</strong> instruction which calls an <strong>external</strong> function defined as <strong>__libc_start_main</strong>, which requires 3 different pointers to <em>interesting memory locations </em>.
+Again, since this executable is not stripped, we can clearly see that the address of <strong>main()</strong> is being loaded into <strong>RDI</strong>. Simply double clicking on main will lead us to the disassembled code of our original C program. Note that the varible that contains the password to our executable is not defined anywhere since the variable was never used.</p>
+<p><img alt="ghidra disassembler view-2" src="/static/images/exe-sc3.png" title="exe-sc3.png"></p>
+<p>As you can see, pretty simple, well defined assembly code for our C program has been found. upon further analysis, we can see some call to functions like malloc, printf, fgets, strncmp, puts and finally __stack_chk_fail which are all external functions. None of the functions other than <strong>stack_chk_fail</strong> needs any explaination. <strong>stack_chk_fail</strong> is needed for a protection system called <strong>stack canary</strong>. Finally we see <strong>RET</strong> and that the end of this long post.</p>
+<p>JK, Its 5 in the morning now and I don't care abou this post anymore. Let me know I you want me to dive deeper into this rabbit hole.</p>
 <blockquote>
 <p>“If you know the enemy and know yourself, you need not fear the result of a hundred battles.
  If you know yourself but not the enemy, for every victory gained you will also suffer a defeat.
  If you know neither the enemy nor yourself, you will succumb in every battle.”  - Sun Tzu</p>
 </blockquote>
-<p><img alt="redacted" src="/static/images/uc.png" title="Under Construction"></p>
+<p><img alt="redacted" src="/static/images/uc.png" title="Under Construction">__</p>
             </div>
             <!-- /.entry-content -->
         </article>
