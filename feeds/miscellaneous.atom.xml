@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Diary of a Cybersec Enthusiast - miscellaneous</title><link href="https://0xdefec8ed.github.io/" rel="alternate"></link><link href="https://0xdefec8ed.github.io/feeds/miscellaneous.atom.xml" rel="self"></link><id>https://0xdefec8ed.github.io/</id><updated>2020-04-11T17:40:00+05:30</updated><entry><title>Introduction</title><link href="https://0xdefec8ed.github.io/introduction.html" rel="alternate"></link><published>2020-04-11T17:40:00+05:30</published><updated>2020-04-11T17:40:00+05:30</updated><author><name>samarth</name></author><id>tag:0xdefec8ed.github.io,2020-04-11:/introduction.html</id><summary type="html">&lt;p&gt;Since this is my first post, I'm not sure of how to make it an interesting and productive read from the begining. Hence I used the initial lines of this entry to state my mind instead of trying to please the internet. before I started working on this blog, I …&lt;/p&gt;</summary><content type="html">&lt;p&gt;Since this is my first post, I'm not sure of how to make it an interesting and productive read from the begining. Hence I used the initial lines of this entry to state my mind instead of trying to please the internet. before I started working on this blog, I already had a gist of the purpose that this blog might serve in the upcoming future. I had already planned out a couple of article ideas but I couldn't decide on how to break the ice. So, I decided to ask my &lt;a href="https://www.instagram.com/samarth.kathal/"&gt;Instagram&lt;/a&gt; peeps to bring in suggestions for this entry.&lt;/p&gt;
+&lt;p&gt;All of you were useless.&lt;/p&gt;
+&lt;h3&gt;Purpose of this blog?&lt;/h3&gt;
+&lt;p&gt;I plan to use this platform as a tool to bring forth the insanity of technology that plagues my mind. there are plenty of perspectives on the internet that can persuade an individual's mind to agree, or disagree with the facts that sleeve the truth. My purpose is simple. I want to persuade your mind into thinking about the fact that we are in hell and technology is the true evil. I plan to collect a useful bunch of followers and finally bring forth my idea of how to dominate this hell, henceforth being corinated as the the true evil, Satan himself.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;"Technology is constructive, hence it makes sense."&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3&gt;A Different Perspective&lt;/h3&gt;
+&lt;p&gt;Us humans are truly facinating! We are entitled with a brain that can only truly understand none other than itself. Our minds can travel to the moon and back by the blink of an eye but we cannot seem to agree on the fact that we did infact, made the travel. Some of the paths leadind the way might get a little bumpy but trust me, it'll all make some sense in the end. atleast for someone out there, it will.&lt;/p&gt;
+&lt;h3&gt;Facts&lt;/h3&gt;
+&lt;p&gt;I have read plenty of blogs on github-pages which are powered by &lt;a href="https://jekyllrb.com/"&gt;Jekyll&lt;/a&gt; or even plain old HTML,CSS,JS combo but I couldn't come across any one who'd use a static site generator like &lt;a href="http://getpelican.com/"&gt;Pelican&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;I believe that I am a good learner of &lt;a href="https://www.djangoproject.com/"&gt;Django&lt;/a&gt; and therefore I whipped up a dynamic site to serve as a blog a while back. But since I didn't felt like investing any money to rent the required hosting space, or the domains for a useless blog, I decided to drop the Idea.&lt;/p&gt;
+&lt;p&gt;3 Months and a pandemic outbreak later, here I am!&lt;/p&gt;
+&lt;p&gt;Some of the upcoming entries to this blog might be filled with some outdated or incorrect information on different subcategories of cybersec like,
+- Reverse Engineering
+- Web security
+- Forensics
+- cryptography
+- etc...&lt;/p&gt;
+&lt;p&gt;I will welcome all suggestions or corrections that you might feel are needed.&lt;/p&gt;
+&lt;p&gt;To be honest, it has always been difficult for me to fully establish the needs of categorising and hence dividing something into different constutients. But because this blog will be made public, I decided to add certain categories and specificly tagged this article under "sanity-check" for some critique readers.&lt;/p&gt;
+&lt;p&gt;I plan to keep the flow of knowledge fluid and therefore I will try to not reinvent the wheel every time I add a contructive article.
+I have always envied the power of open-source its contributers and therefore I plan to link all the amazing sources behind every constructive article.&lt;/p&gt;
+&lt;p&gt;The layout and features of this blog will always remain fluid and I welcome all kinds of contributions and critizisms.&lt;/p&gt;
+&lt;p&gt;If you believe in the power of constructive collaborations, you are welcome to any of my &lt;a href="https://github.com/samarthkathal"&gt;Social Media&lt;/a&gt; dms, where we can plan to bring you in as an author for a small price of your soul.&lt;/p&gt;
+&lt;p&gt;This intital post took me longer than I expected and this honestly isn't much. I know I might have made plenty of odd mistakes which I selectively decided to ignore, bringing in all the hate from my grammer nazi readers. It is now 11:50 PM and I know that I am cutting it too close to the deadline I initially promised to work with but honestly, IDGAF.&lt;/p&gt;
+&lt;p&gt;Also, I do realise that this post doesn't look like a joke but do note, that it is clearly meant to be one and I couldn't help myself from stating it in the end of this article because I do expect that this might not be what some of you would have expected from me.&lt;/p&gt;
+&lt;p&gt;Again, thank you for your kind time and I hope that you will look forward to the upcoming blog posts that I will plan to release from time to time. &lt;/p&gt;
+&lt;p&gt;:) &lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;"We are mutually oblivious to sanity my friend."&lt;/p&gt;
+&lt;/blockquote&gt;</content><category term="miscellaneous"></category><category term="sanity-check"></category><category term="misc"></category></entry></feed>
