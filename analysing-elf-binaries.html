@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en" itemscope itemtype="http://schema.org/Person">
+<head>
+  <meta charset="utf-8">
+  <!-- Site Meta Data -->
+  <title>Analysing ELF Binaries</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="samarth">
+
+  <link rel="shortcut icon" href="">
+
+  <!-- schema.org -->
+  <meta itemprop="name" content="Diary of a Cybersec Enthusiast">
+  <meta itemprop="image" content="">
+  <meta itemprop="description" content="">
+
+  <!-- Style Meta Data -->
+  <link rel="stylesheet" href="/theme/css/milligram.css" type="text/css" />
+  <link rel="stylesheet" href="/theme/css/custom.css" type="text/css" />
+
+  <!-- Feed Meta Data -->
+
+  <!-- Twitter Feed -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="">
+  <meta name="twitter:image" content="">
+
+<meta name="twitter:creator" content="">
+<meta name="twitter:url" content="/analysing-elf-binaries.html">
+<meta name="twitter:title" content="Diary of a Cybersec Enthusiast ~ Analysing ELF Binaries">
+<meta name="twitter:description" content="When I was in middle school, I was introduced to this new kind of magical number system called &#34;binary&#34;. Since then, I have always been facinated by 0&#39;s and 1&#39;s. I always wondered how some combinations of just 2 possibilities could build something so complex and beautiful as the internet …">
+
+<!-- Facebook Meta Data -->
+<meta property="og:title" content="Diary of a Cybersec Enthusiast ~ Analysing ELF Binaries" />
+<meta property="og:description" content="When I was in middle school, I was introduced to this new kind of magical number system called &#34;binary&#34;. Since then, I have always been facinated by 0&#39;s and 1&#39;s. I always wondered how some combinations of just 2 possibilities could build something so complex and beautiful as the internet …" />
+<meta property="og:image" content="" />
+</head>
+
+<body>
+    <div class="container">
+
+    <!-- Navbar -->
+      <div class="navbar">
+        <ul>
+            <div>
+                <li>
+                    <a href=""><h3>Diary of a Cybersec Enthusiast</h3></a>
+                </li>
+                <li>
+                </li>
+            </div>
+        </ul>
+      </div>
+
+  <!-- Sidebar -->
+    <sidebar>
+        <ul class="static-item">
+
+        </ul>        
+
+        <ul>
+                <div class="cat-border">
+                <li style="color: #F2F1EF; background-color: #6C7A89;">Categories</li>
+                    <li><a href="/category/malware-analysis.html">malware-analysis</a></li>
+                    <li><a href="/category/reverse-engineering.html">reverse-engineering</a></li>
+                    <li><a href="/category/uncategorized.html">uncategorized</a></li>
+                    <li><a href="/category/write-ups.html">write-ups</a></li>
+                </div>
+        </ul>
+
+            <h2><br/>BLOGROLLS</h2>
+            <ul>
+                    <li><a href="http://getpelican.com/">Pelican</a></li>
+                    <li><a href="http://python.org/">Python.org</a></li>
+                    <li><a href="http://jinja.pocoo.org/">Jinja2</a></li>
+            </ul> 
+   
+        <p> 
+                <span>
+                    <a href="https://github.com/samarthkathal" target="_blank">
+                        <img class="social-icons-m" src="/theme/images/icons/github.png">
+                    </a>
+                </span>
+                <span>
+                    <a href="https://twitter.com/samarth_kathal" target="_blank">
+                        <img class="social-icons-m" src="/theme/images/icons/twitter.png">
+                    </a>
+                </span>
+                <span>
+                    <a href="https://www.instagram.com/samarth.kathal/" target="_blank">
+                        <img class="social-icons-m" src="/theme/images/icons/instagram.png">
+                    </a>
+                </span>
+        </p>
+        <p>
+        </p>
+        <p>
+        </p>
+    </sidebar>
+    
+    <maincontent>
+<h2>
+    <a href="/analysing-elf-binaries.html" rel="bookmark" title="Permalink to Analysing ELF Binaries">Analysing ELF Binaries</a>
+</h2>
+
+<div>
+    <b>By: </b><a href="/author/samarth.html">samarth</a><b>    On: </b>Sat 11 April 2020<br />
+    <b>In: </b><a href="/category/reverse-engineering.html" rel="bookmark" title="Permalink to reverse-engineering">reverse-engineering</a><br />
+    <em><b>Tags: </b>
+                <span><a href="/tag/reverse-engineering.html">#reverse-engineering </a></span>
+                <span><a href="/tag/primer.html">#primer </a></span>
+    </em>
+    <hr>
+</div>
+
+<div>
+    <mainarticle>
+    <p>When I was in middle school, I was introduced to this new kind of magical number system called "binary". Since then, I have always been facinated by 0's and 1's. I always wondered how some combinations of just 2 possibilities could build something so complex and beautiful as the internet. I soon began to understand how things needed to be planned out before you start to build it. Reverse-Engineering is different. It needs practice. It requires experience. And you can never say that you've had enough of both to say that you are good at it.</p>
+<p><strong>DISCLAIMER</strong> : Most of the information in this article has been written from memory. I have sourced some material from this <a href="https://www.amazon.com/Learning-Binary-Analysis-elfmaster-ONeill/dp/1782167102">amazing book</a> or internet when needed. I know that it is very difficult to write an article on such a vast topic as binary analysis therefore I will try to accodomate as much information as I can without getting lost in this rabit hole. I wouldn't know how well this article will be drafted for a general audience before completing it and therefore I suggest further read if needed.
+This topic offers a huge amount of information, and I am by no means an expert in this subject. I will still try to keep it short and convey my knowledge in this subjects through the written content as well as some references attached.</p>
+<h4><strong>What is an ELF file?</strong></h4>
+<p>It is easy to define a file in terms of <a href="https://en.wikipedia.org/wiki/Linux">Linux</a>. - everything in linux is a file. And therefore I have decided to write this article based on the linux terminologies.</p>
+<p><a href="http://man7.org/linux/man-pages/man5/elf.5.html">ELF</a> is a File standard that is used to define a <a href="https://en.wikipedia.org/wiki/Binary_file">binary</a> file.
+Binary files are coded to perform an action upon execution. It is a standard binary format for Linux and Unix-like systems on x86 processors. ELF64 is the revised standard for systems on x64 processors.</p>
+<p>A file is simply an abstract object filled with chunks of 0's and 1's that might not make sense when looked under a microscope, but when you zoom out a little, it begins to make patterns. Initially those patterns might seem too complex and tangled to be designed by a humans, but that is the true beauty that is facinating to me.</p>
+<p>I wish to explore how different systems are designed to parse an ELF binary and the elements revolving around it that makes those files breathe.</p>
+<h3><strong>Important elements of a binary</strong></h3>
+<p>A binary file is compiled in such a way that it needs to rely on the core components which must abide by the proposed ABI of the system it needs to be run on. <a href="https://en.wikipedia.org/wiki/Linux_kernel_interfaces#Linux_ABI">ABI</a> is similar to <a href="https://en.wikipedia.org/wiki/Web_API">API</a>, but it is different in a lot of ways since it is a term for much lower level components like Bootloader, Kernel, Operating System etc). We can also relate a binary executable to a program built for any embedded system such as <strong>8085</strong>, <strong>8086</strong> etc.</p>
+<p>Two of the most widely used binary formats are <strong>ELF</strong> and <strong>PE</strong> which are the standards on Linux and Windows systems respectively. All Modern computers perform their computations using binary number system which is defined by a set of rules to express all kinds of data in 1's and 0's. </p>
+<p><strong>ELF</strong> is a file standard that most modern systems(read: linux) can understand as it is pretty well defined and most worked with. The two major sections defined in an ELF file are the "<strong>ELF Header</strong>", and "<strong>File DATA</strong>". ELF headers are always 64 bytes long for a 64 bit binary in a 64 bit platform and they contain the primary sets of information on how to interpret the file. <strong>File Data</strong> consists of more header information and many different sections to properly organise the different components of the code that needs to be executed. File data is basicly the the main code that makes the file breathe.</p>
+<p><img alt="ELF layout table" src="/static/images/Elf-layout.svg" title="Elf-layout.svg"></p>
+<p>The purpose of ELF header is simple, to inform the executer of the file (Operating system in general) of what it contains. Most of the information thaat you'd see when using a simple command such as <code>readelf</code> on a binary is directly provided, or derived from the different headers of that file. For more information on ELF headers, you can go through the man page on <a href="https://linux.die.net/man/5/elf">ELF</a>.</p>
+<p>The command <code>readelf -h</code> will reveal all the header information on the binary.</p>
+<p>The header structure is not difficult to grasp. It always holds all the information as some kind of road map for the binary within the very first bytes of the file. Here is the ELF Header struct to get a gist of its purpose.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#define EI_NIDENT 16</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">e_ident</span><span class="p">[</span><span class="n">EI_NIDENT</span><span class="p">];</span>
+    <span class="kt">uint16_t</span>      <span class="n">e_type</span><span class="p">;</span>
+    <span class="kt">uint16_t</span>      <span class="n">e_machine</span><span class="p">;</span>
+    <span class="kt">uint32_t</span>      <span class="n">e_version</span><span class="p">;</span>
+    <span class="n">ElfN_Addr</span>     <span class="n">e_entry</span><span class="p">;</span>
+    <span class="n">ElfN_Off</span>      <span class="n">e_phoff</span><span class="p">;</span>
+    <span class="n">ElfN_Off</span>      <span class="n">e_shoff</span><span class="p">;</span>
+    <span class="kt">uint32_t</span>      <span class="n">e_flags</span><span class="p">;</span>
+    <span class="kt">uint16_t</span>      <span class="n">e_ehsize</span><span class="p">;</span>
+    <span class="kt">uint16_t</span>      <span class="n">e_phentsize</span><span class="p">;</span>
+    <span class="kt">uint16_t</span>      <span class="n">e_phnum</span><span class="p">;</span>
+    <span class="kt">uint16_t</span>      <span class="n">e_shentsize</span><span class="p">;</span>
+    <span class="kt">uint16_t</span>      <span class="n">e_shnum</span><span class="p">;</span>
+    <span class="kt">uint16_t</span>      <span class="n">e_shstrndx</span><span class="p">;</span>
+<span class="p">}</span><span class="n">fN_Ehdr</span><span class="p">;</span>
+</code></pre></div>
+
+
+<p>But wait,</p>
+<h4><strong>How Are ELF Files Constructed?</strong></h4>
+<p>Binary files are <strong>compiled</strong> from their source code which is can be written in various languages such as C, C++, Rust etc. Unforunately, I am still ill-informed on the compilation process of all other kinds of binaries other than C and therefore I can only write about different phases of compilation for a compiled binary in <strong>C</strong>.</p>
+<p><img alt="c-compilation-process" src="/static/images/c-compilation-process.png" title="c-compilation-process"></p>
+<p>A good C coder would know that even the most basic "HELLO WORLD" program cannot be built with just 6 lines of code without using pre-defined headers and macros which act as wrappers to the barebones of the <strong>ABI</strong>.</p>
+<p>First step of compilation process is called the <strong>preprocessing-phase</strong>, wherein the compiler is tasked to expand the source code by copying in all the macros(#define) and header files(#include) so that all thats left in the source code is pure C code that is ready to get compiled.</p>
+<p>Second step is called <strong>compilation-phase</strong>. The compilation phase takes the pre-processed code and translates it into assembly language. Most compilers also perform heavy optimization in this phase which can lead to differences in how disassembly of the the source code during this phase can and look like. keep in mind that the final binary is also derived from this phase and therefore any optimisations done by the compiler in this phase will affect the final outcome of the binary as well.</p>
+<p>Next step is called <strong>assembly phase</strong>. The input of this phase is assembly code generated by the compiler and the output is actual <strong>machine code</strong> which is provided as a set of object files(<em>.o). Object files contain machine instructions that are inprinciple executable by the processor and are really just a blob of binary. But we still need to do some work to produce a ready to run binary executable file. Typically, each source file corresponds to one assembly file, and each assembly file corresponds to one object file. Object files are </em><em>relocatable</em>* type of ELF files. </p>
+<p>Object files are compiled independently from each other, so the assembler has no way of knowing the memory addresses of other object files when assembling an object file. That’s why object files need to be relocatable; that way,you can link them together in any order to form a complete binary executable.If object files were not relocatable, this would not be possible.</p>
+<p><strong>Linking phase</strong> is the final phase of the compilation process. As the name implies, this phase links together all the object files into a single binary executable. In modern systems, the linking phase some times incorporates an additional optimization pass, called link­ time optimization (LTO) or simply called, <strong>lazy linking</strong>. The linker’s job is to take all the object files belonging to a program and merge them into a single coherent executable, typically intended to be loaded at a particular memory address. Now that the arrangement of all modules in the executable is known, the linker can also resolve most symbolic references. References to libraries may or may not be completely resolved, depending on the type of library.</p>
+<p>There are static libraries (file.a) and dynamic libraries (file.so). Static libraries are merged into the binary and therefore can be resolved entirely. Dynamic libraries are loaded into the memory only once, typically upon the startup of the system and the binary that wants to use this library has to share it with other executables as well as the system. During the linking phase, the addresses at which dynamic libraries will reside are not yet known, so references to them can not be resolved. Instead, the linker leaves symbolic references to these libraries even in the final executable, and these references are not resolved until the binary is actually loaded into memory to be executed(lazy linking). The final compiled executable can either be statically or dynamically linked. If the executable is dynamically linked, the interpreter header defined inside the ELF file tells us which dynamic linker will be used to resolve the dynamic libraries upon execution (typical interpreter for 64 bit system is /lib64/ld-linux-x86-64.so.2).</p>
+<p>Okay, I feel like I've successfully painted a picture of how trivial all this stuff is. Lets dive deeper.</p>
+<h4><strong>Theory of the ELF standard, ELF headers</strong></h4>
+<p>ELF files generally require only 2 kinds of headers,</p>
+<ul>
+<li><strong>ELF header</strong> and the <strong>program header</strong>, or</li>
+<li><strong>ELF header</strong> and the <strong>section header</strong>.</li>
+</ul>
+<p>What I mean by required is that typically, the OS needs program headers to map the contents of the file in memory and section headers to further divide the contents into different sections (giving them labels) which is not required for a successful execution.</p>
+<p>When the C code that has been compiled to produce the binary contains external imports, as well as internal library function that are further meant to be exported, both program header and section headers are necessary. Program headers are a necessity to exist inside an executable file. They do not exist in relocatable objects because these *.o files are meant to be linked into an executable but not meant to be loaded directly into memory!</p>
+<p>Lets understand ELF files a bit more. ELF stands for Executable and Linkable Format. In general, I've mostly dealt with ELF files which are either plain old</p>
+<ul>
+<li><strong>ET_EXEC</strong> - Executable Files (typical C program with a main() function),</li>
+<li><strong>ET_DYN</strong>  - Shared Libraries(shared libraries are loaded and linked into a program's process image at runtime. eg <code>lib.so</code>) </li>
+<li><strong>ET_REL</strong>  - Relocatable object files (Position independent code(PIC) that have not yet been linked into an executable)</li>
+</ul>
+<p><em>Shared libraries are compiled as position-independent and can therefore be easily relocated into a process address space. A shared library is a dynamic ELF object.</em></p>
+<blockquote>
+<p>I have skipped ET_NONE and ET_CORE types of files.</p>
+</blockquote>
+<h4><strong>Headers and their purpose</strong></h4>
+<p><strong>ELF PROGRAM HEADER</strong> : This header is used to describe <strong>SEGMENTS</strong> (relate to memory segments in 8086) within the binary which is needed by the ABI layer to describe the memory layout of the executable. This header is needed for successful execution of a program. The size of the program headers can can vary as it holds information on different segments inside the executable. There is not much needed to know here other than the fact that the SEGMENTS are essentially a derivation from old school 8086 architecture and if you are fluent in it, it'll be easier for you to understand how things work better.</p>
+<p><em>There are some values defined in the struct of program headers which are really interesting for use-cases where the executable which needs to be reversed is being percieved difficult for an initial learner. Most of these values are further used by the section headers to properly define the different sections that are essential for de-compilers. program header contains information (like size, offset and set values generally) on different segments and their permissions (for eg, READ+EXECUTE for text segment). Information on symbols table, string table, global offset table etc.</em></p>
+<p><em>Note: We can easily calculate the size of the program header by doing e_phentsize * e_phnum</em></p>
+<p><strong>ELF SECTION HEADER</strong> : This header defines the <strong>SECTIONS</strong> wich live inside the different <strong>SEGMENTS</strong> of the executable. Within each segment, there is either code or data divided up into sections. A section header table exists to reference the location and size of these sections and is primarily for linking and debugging purposes. Section headers are not necessary for program execution, and a program will execute just fine without having a section header table. This is because the section header table doesn't describe the program memory layout. That is the responsibility of the program header table. </p>
+<p>Some interesting sections are,</p>
+<p><strong>.text</strong>   : It contains the program code. The loader(linux-ld.so) loads instructions from here and executes them. It is often read only.</p>
+<p><strong>.rodata</strong> : It holds all the read-only data such as strings from a line of C code such as a string defined in a printf() function.</p>
+<p><strong>.data</strong>   : This section might contain more data, such as a string that is stored in a variable that is defined in an executable.</p>
+<p><strong>.bss</strong>    : All the uninitialized data is stored here. This consists of all global and static variables which are not initialized by the programmer. The kernel initializes them to arithmetic 0 by default.</p>
+<p><strong>.plt</strong>    : This section contains information on the code which is being imported from an external library (in our case, functions like printf(), fgets() and strncmp()). The procedure linkage table (PLT) contains information for the dynamic linker to be able to call functions from used shared libraries.</p>
+<p><strong>.got.plt</strong>: The global offset table (GOT) works together with the PLT to dynamically resolve and access imported shared library functions. This one is often attacked in GOT-overwrite exploits.</p>
+<p><strong>.dynsym</strong> : This sections contains information about dynamic symbols imported from shared libraries e.g. printf from libc. These are dynamically loaded at runtime.</p>
+<p>I won't be looking into rest of the sections as I still want to keep this post short.</p>
+<hr>
+<p><img alt="ghidra disassembler view" src="/static/images/exe-sc2.png" title="exe-sc2.png"></p>
+<hr>
+<h4><strong>ELF Symbols</strong></h4>
+<p>ELF symbols table is derived from the section headers. Symbols are a symbolic reference to some type of data or code such as a global variable or function. For instance, <strong>the printf() function is going to have a symbol entry that points to it in the dynamic symbol table .dynsym</strong>. In most shared libraries and dynamically linked executables, there exist two symbol tables. <strong>.dynsym and .symtab</strong>. When a binary is stripped, all the entries on <strong>static symbols</strong> is removed. Hence, symbols information is not a necessary condition for execution. In some statically compiled binaries, <strong>dynamic symbols</strong> aren't needed as well.</p>
+<p>The .dynsym contains global symbols that reference symbols from an external  source, such as libc functions like printf, whereas the symbols contained in .symtab will contain all of the symbols in .dynsym, as well as the local symbols for the executable, such as global variables, or local functions that you have defined in your code. So .symtab contains all of the symbols, whereas .dynsym contains just  the dynamic/global symbols.</p>
+<p><em>existance of .symtab is not a necessary for proper execution of a (dynamically linked) binary</em></p>
+<h4><strong>ELF dynamic linking</strong></h4>
+<p>ELF files can be compiled statically or dynamically. There are various major differences between both kinds of binaries and in general, dynamic linking is a much more effecient way to go about handling shared libraries.</p>
+<p>An executable or shared object file's program header table is an array of structures, each describing a segment or other information that the system needs to prepare the program for execution.</p>
+<p>An object file segment contains one or more sections.</p>
+<p><strong>Sections</strong> are usually used to store code, data, and metadata (like debug info) in object files (.o) and are intended to be read by the linker. <strong>Object files don't contain much segment information</strong>. The linker then reads in the sections from multiple object files and combines them. Since the linker is responsible for creating the segments in the final compiled binary, it only needs the <strong>section headers</strong> of object files to properly place the intended object code inside the compiled binary.</p>
+<p>Executable and shared object files statically represent programs. When we execute these programs, the system uses these files(<strong>executable and object files only</strong>) to create dynamic program representations, or process images. A process image has <strong>segments</strong> that contain its text, data, stack, and so on.</p>
+<h3><strong>But what is dynamic linking?</strong></h3>
+<p>Shared libraries are compiled as position-independent and can therefore be easily relocated into a process address space. A shared library is a dynamic ELF object.</p>
+<p><strong>Shared libraries (DLLs/dynamically linked libraries)</strong> can be needed/called by multiple executables at a time, therefore the cannot be relocated inside a compiled binary every time.</p>
+<p>Dynamic objects are very similar to executables. They do not typically have a <strong>PT_INTERP(program header that contains the path to the program interpreter)</strong> segment since they are loaded by the program interpreter, and therefore will not be invoking a program interpreter.</p>
+<p><em>Instead of using the original executable file's segment images, the system composes a memory image for the interpreter. It then is the interpreter's responsibility to receive control from the system and provide an environment for the application program.</em></p>
+<p><a href="http://www.sco.com/developers/gabi/latest/ch5.dynamic.html#interpreter">Solaris Docs</a> on Dynamic linker says,</p>
+<p><a href="http://man7.org/linux/man-pages/man2/execve.2.html">sys_exec()</a> and the dynamic linker cooperate to create the process image for the program, which entails the following actions:</p>
+<ul>
+<li>Adding the executable file's memory segments to the process image;</li>
+<li>Adding shared object memory segments to the process image;</li>
+<li>Performing relocations for the executable file and its shared objects;</li>
+<li>Closing the file descriptor that was used to read the executable file, if one was given to the dynamic linker;</li>
+<li>Transferring control to the program, making it look as if the program had received control directly from exec(BA_OS).</li>
+</ul>
+<p>Looking further for answers, <a href="https://docs.oracle.com/cd/E19683-01/816-1386/6m7qcoblk/index.html#chapter6-71736">Oracle Docs</a> says,</p>
+<p>The link-editor constructs various data for executable and shared object files that assist the runtime linker. These data reside in loadable segments, making them available during execution. These segments include:</p>
+<ul>
+<li>A .dynamic section with type SHT_DYNAMIC that holds various data. The structure residing at the beginning of the section holds the addresses of other dynamic linking information.</li>
+<li>The .got and .plt sections with type SHT_PROGBITS that hold two separate tables: the global offset table and the procedure linkage table. Sections below explain how the runtime linker uses and changes the tables to create memory images for object files.</li>
+<li>The .hash section with type SHT_HASH that holds a symbol hash table.</li>
+</ul>
+<p>Shared objects can occupy virtual memory addresses that are different from the addresses recorded in the file's program header table. The runtime linker relocates the memory image, updating absolute addresses before the application gains control.</p>
+<p>Here is an overview on how an executable is loaded in the memory.</p>
+<p><img alt="loaded-elf-binary-on-linux" src="/static/images/loaded-elf-binary-on-linux.png" title="loaded-elf-binary-on-linux"></p>
+<p><strong>Okay!</strong></p>
+<blockquote>
+<p>So when an executable which is dynamically linked gets executed, program interpreter, whose default path is stored in the PT_INTERP header gets invoked. The syscall, sys_execve() then communicates with the <strong>ABI</strong> to map the executable into the memory. <strong>stack</strong>, along with other necessary things are generated. The stack for that process address space is set up in a very specific way to pass information to the dynamic linker. This particular setup and arrangement of information is known as the <strong>auxiliary vector</strong> or auxv. The <a href="http://articles.manugarg.com/aboutelfauxiliaryvectors.html">auxiliary vector</a> gets set up by a kernel function called create_elf_tables()that resides in the Linux source code /usr/src/linux/fs/binfmt_elf.c.</p>
+<p>[argc] [argv] [envp] [auxiliary] [.ascii data for argv/envp]</p>
+<p>Once a program is loaded into memory and the auxiliary vector has been filled in, control is passed to the dynamic linker. The dynamic linker resolves symbols and relocations for shared libraries that are linked into the process address space. By default, an executable is dynamically linked with the GNU C library libc.so.</p>
+</blockquote>
+<h4><strong>The PLT/GOT Sections</strong></h4>
+<p>The PLT (procedure linkage table) and GOT (Global offset table) can be found in executable files and shared libraries. When a program calls a shared library function such as strcpy() or printf(), which are not resolved until runtime, <strong>dynamic linker</strong> comes into play.</p>
+<p>Once the program has been executed and printf() has been called atleat once, a simple disassembly can show us that when printf() gets called again, the compiled code takes a jump onto the PLT jump table entry for printf(). This PLT table contains another jump entry to a different section. This address is a GOT (Global offset table) entry that holds the address to the actual printf() function in the libc shared library.</p>
+<p>All dynamically called function have a relocation entry of type R_386_JUMP_SLOT/R_X86_64_JUMP_SLOT at their GOT offsets. This means that the dynamic linker has to resolve the address of printf() and place its value into  the GOT entry for printf().</p>
+<p>Before the program gets executed, the GOT entry of the function call contains a <strong>jump back to the PLT entry of the function</strong>, where a <code>push   $0x0</code> is stored.</p>
+<p>The purpose of this push instruction is to push the GOT entry for printf() onto the stack. The GOT entry offset for printf() is 0x0, which corresponds to the first GOT entry that is reserved for a shared library symbol value, which is actually the fourth GOT entry, GOT[3]. In other words, the shared library addresses don't get plugged in starting at GOT[0] and they begin at GOT[3] (the fourth entry) because the first three are reserved for other purposes.</p>
+<p><em>Take note of the following GOT offsets:</em>
+- <em>GOT[0] contains an address that points to the dynamic segment of the executable, which is used by the dynamic linker for extracting dynamic linking-related information.</em>
+- <em>GOT[1] contains the address of the link_map structure that is used by the dynamic linker to resolve symbols.</em>
+- <em>GOT[2] contains the address to the dynamic linkers _dl_runtime_resolve() function that resolves the actual symbol address for the shared library function.</em></p>
+<p><em>The final printf() PLT instruction is a jmp to the PLT-0 code.</em>
+<em>The first instruction of PLT-0 pushes the address of GOT[1] onto the stack that contains an offset into the link_map struct for printf().</em>
+<em>The second instruction of PLT-0 is a jmp to the address in GOT[2] that points to the dynamic linker's _dl_runtime_resolve(), which then handles the R_386_JUMP_SLOT relocation by adding the symbol value (memory address) of printf() to its corresponding GOT entry in the .got.plt section.</em></p>
+<p>The next time printf() is called, the PLT entry will jump directly to the function itself rather than having to perform the relocation procedure again.</p>
+<h4><strong>The magic of dynamic linkers</strong></h4>
+<p>When the dynamic linker is mapped into memory, it first handles any of its own relocations if necessary; remember that the linker is a shared library itself. It then looks at the executable program's dynamic segment and searches for the DT_NEEDED tags that contain pointers to the strings or pathnames of the necessary shared libraries. When it maps a needed shared library into the memory, it accesses the library's dynamic segment (yes, they too have dynamic segments) and adds the library's symbol table to a chain of symbol tables that exists to hold the symbol tables for each mapped library.</p>
+<p>The linker creates a struct link_map entry for each shared library and stores it in a <strong>linked list</strong></p>
+<p>Once the linker has finished building its list of dependencies, it handles the relocations on each library, as well as fixing up the GOT of each shared library. Lazy linking still applies to the PLT/GOT of shared libraries as well, so GOT relocations (of type R_386_JMP_SLOT) won't happen until the point when a function has actually been called.</p>
+<h4><strong>Linker-related environment points</strong></h4>
+<p>The dynamic loader/linker and linking concepts are inescapable components involved in the process of program linking and execution. In Linux, there are quite a few ways to alter the dynamic linker's behavior that can serve the binary hacker in many ways. There is an amazing POC published in an issue of <a href="https://www.amazon.com/PoC-GTFO-Manul-Laphroaig/dp/1593278802">POC||GTFO</a> which explores the method of writing a binary that utilises the features of the linker. </p>
+<h5>The LD_PRELOAD environment variable</h5>
+<p>The LD_PRELOAD environment variable can be set to specify a library path that should be dynamically linked before any other libraries. This has the effect of allowing functions and symbols from the preloaded library to override the ones from the other libraries that are linked afterwards. This essentially allows you to perform runtime patching by redirecting shared library functions. </p>
+<p>This technique can be used to bypass anti-debugging code and for userland rootkits.</p>
+<h5>Linker scripts</h5>
+<p>Linker scripts are a point of interest to us because they are interpreted by the linker and help shape a program's layout with regard to sections, memory, and symbols. The default linker script can be viewed with <em>ld -verbose</em>.</p>
+<p><em>The ld command language is quite an in-depth language and is beyond the scope of this book, but it is worth checking out. And while reverse engineering executables, remember that common segment addresses may sometimes be modified, and so can other portions of the layout. This indicates that a custom linker script is involved. A linker script can be specified with gcc using the -T flag.</em></p>
+<h3>Callback to Homebase, Some Important Points</h3>
+<p>This was a lot of information already, but I hope you’re still following along.</p>
+<p>To summarize, we now know the following:</p>
+<ul>
+<li>
+<p>An ELF header resides at the beginning and holds a road map describing the files organization.</p>
+</li>
+<li>
+<p>A program header within the program header table is necessary for an executable file to map the binary correctly into memory.</p>
+</li>
+<li>
+<p>A section within the section header table holds object file information for the linking view like instructions, data, symbol table, relocation information, and more, but is optional for executable files.</p>
+</li>
+<li>
+<p>Dynamically linked binaries are parsed by the system in two different ways. Once by the kernel through execve() syscall and later by the dynamic linker. </p>
+</li>
+</ul>
+<p>Here is a simple Python script I found recently to start the disassembly part using <a href="http://www.capstone-engine.org/lang_python.html">capstone</a> <strong>python's elftools</strong> package. </p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">elftools.elf.elffile</span> <span class="kn">import</span> <span class="n">ELFFile</span>
+<span class="kn">from</span> <span class="nn">capstone</span> <span class="kn">import</span> <span class="o">*</span><span class="k">def</span> <span class="nf">process_file</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">elffile</span> <span class="o">=</span> <span class="n">ELFFile</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="n">code</span> <span class="o">=</span> <span class="n">elffile</span><span class="o">.</span><span class="n">get_section_by_name</span><span class="p">(</span><span class="s1">&#39;.text&#39;</span><span class="p">)</span>
+    <span class="n">opcodes</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">data</span><span class="p">()</span>
+    <span class="n">addr</span> <span class="o">=</span> <span class="n">code</span><span class="p">[</span><span class="s1">&#39;sh_addr&#39;</span><span class="p">]</span>
+    <span class="nb">print</span> <span class="s1">&#39;Entry Point:&#39;</span><span class="p">,</span> <span class="nb">hex</span><span class="p">(</span><span class="n">elffile</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;e_entry&#39;</span><span class="p">])</span>
+    <span class="n">md</span> <span class="o">=</span> <span class="n">Cs</span><span class="p">(</span><span class="n">CS_ARCH_X86</span><span class="p">,</span> <span class="n">CS_MODE_64</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">md</span><span class="o">.</span><span class="n">disasm</span><span class="p">(</span><span class="n">opcodes</span><span class="p">,</span> <span class="n">addr</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;0x</span><span class="si">%x</span><span class="s2">:</span><span class="se">\t</span><span class="si">%s</span><span class="se">\t</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">i</span><span class="o">.</span><span class="n">mnemonic</span><span class="p">,</span> <span class="n">i</span><span class="o">.</span><span class="n">op_str</span><span class="p">))</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">process_file</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</code></pre></div>
+
+
+<blockquote>
+<p>“If you know the enemy and know yourself, you need not fear the result of a hundred battles.
+ If you know yourself but not the enemy, for every victory gained you will also suffer a defeat.
+ If you know neither the enemy nor yourself, you will succumb in every battle.”  - Sun Tzu</p>
+</blockquote>
+<h4>refs:</h4>
+<p><a href="https://0x00sec.org/t/dissecting-and-exploiting-elf-files/7267">Dissecting and Exploiting ELFs, more info on readelf</a></p>
+    </mainarticle>
+</div>
+<hr>
+        
+<div>
+        <i>If you found the article helpful, please share or cite the article, and spread the word:</i>
+            <p style="margin-top: 2%;">
+                <span><a target="_blank" rel="nofollow" onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=400,width=700');return false;" title="Twitter" href="https://twitter.com/share?url=/analysing-elf-binaries.html&text=Analysing ELF Binaries&via="><img class="social-icons-a" src="/theme/images/icons/twitter.png"></a></span>
+                <span><a target="_blank" title="Facebook" rel="nofollow" onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=500,width=700');return false;" href="https://www.facebook.com/sharer.php?u=/analysing-elf-binaries.html&t=Analysing ELF Binaries"><img class="social-icons-a" src="/theme/images/icons/facebook.png"></a></span>
+
+                <span><a  target="_blank" title="Linkedin" href="https://www.linkedin.com/shareArticle?mini=true&url=/analysing-elf-binaries.html&title=Analysing ELF Binaries" rel="nofollow" onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=450,width=650');return false;"><img class="social-icons-a" src="/theme/images/icons/linkedin.png"></a></span>
+            </p>
+</div>
+<hr>
+    <p><i>For any feedback or corrections, please write in to: </i><b> samarthkathal@gmail.com </b></p>
+        
+    </maincontent>
+
+  <!-- Analytics -->
+
+  </div>
+</body>
+
+</html>

